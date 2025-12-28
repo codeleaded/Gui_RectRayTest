@@ -147,10 +147,12 @@ int Rect_Compare(Rect* r1,Rect* r2){
 }
 
 void Setup(AlxWindow* w){
-	tv = TransformedView_New((Vec2){ GetWidth() * 0.02f,GetWidth() * 0.02f });
-    TransformedView_Offset(&tv,(Vec2){ -1.0f,-1.0f });
+	tv = TransformedView_New((Vec2){ GetWidth(),GetHeight() });
+    TransformedView_Focus(&tv,&player.p,player.l);
+	TransformedView_Zoom(&tv,(Vec2){ 0.05f,0.05f });
+    //TransformedView_Offset(&tv,(Vec2){ -8.0f,-1.0f });
 
-	player = (SRect){ 0.0f,0.0f,0.5f,0.5f,0.0f,0.0f,0.0f,-10.0f };
+	player = (SRect){ 0.0f,0.0f,0.5f,0.5f,0.0f,0.0f,0.0f,10.0f };
 	memset(world,0,sizeof(world));
 }
 
@@ -170,17 +172,18 @@ void Update(AlxWindow* w){
 		}
 	}
 
-	if(Stroke(ALX_KEY_UP).DOWN) 		player.v.y = -SPEED;
-	else if(Stroke(ALX_KEY_DOWN).DOWN) 	player.v.y = SPEED;
+	if(Stroke(ALX_KEY_W).DOWN) 			player.v.y = -SPEED;
+	else if(Stroke(ALX_KEY_S).DOWN) 	player.v.y = SPEED;
 	//else 								player.v.y = 0.0f;
 
-	if(Stroke(ALX_KEY_LEFT).DOWN) 		player.v.x = -SPEED;
-	else if(Stroke(ALX_KEY_RIGHT).DOWN) player.v.x = SPEED;
+	if(Stroke(ALX_KEY_A).DOWN) 			player.v.x = -SPEED;
+	else if(Stroke(ALX_KEY_D).DOWN) 	player.v.x = SPEED;
 	else 								player.v.x = 0.0f;
 
 
 	player.v = Vec2_Add(player.v,Vec2_Mulf(player.a,w->ElapsedTime));
 	Vec2 target = Vec2_Add(player.p,Vec2_Mulf(player.v,w->ElapsedTime));
+	target = Vec2_Clamp(target,(Vec2){0.0f,0.0f},(Vec2){SIZEX,SIZEY});
 
 	Clear(BLACK);
 
@@ -274,11 +277,9 @@ void Update(AlxWindow* w){
 	
 	SRect_Render(&player);
 
-
-
-	// String str = String_Format("P: X: %f, Y: %f",p.x,p.y);
-	// RenderCStrSize(str.Memory,str.size,0.0f,0.0f,WHITE);
-	// String_Free(&str);
+	String str = String_Format("O: %f,%f | Z: %f,%f",tv.Offset.x,tv.Offset.y,tv.Scale.x,tv.Scale.y);
+	RenderCStrSize(str.Memory,str.size,0.0f,0.0f,WHITE);
+	String_Free(&str);
 }
 
 void Delete(AlxWindow* w){
